@@ -15,6 +15,7 @@ html, body {
   color: #FFF;
   left: 0;
   /* make our position the top left of the container */
-  top: 0; }
+  top: 0;
+  font-size: 12px; }
 
 /*# sourceMappingURL=index.css.map */

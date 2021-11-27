@@ -11,8 +11,6 @@ let data = {};
 
 const path1 = ["cocotte", "lettre", "cube"];
 
-
-
 (async function(window){
     // console.log(data);
     loadData("./data/object-points.json", "points").then(loadData("./data/nebula-points.json", "nebula")).then(main);
@@ -71,6 +69,8 @@ function main() {
 	    point.subtype = type;
 	    point.name = element.name
     	    scene.add(point);
+
+	    drawObject('_assets/cube.glb', element.name, element.position);
 	}
     }
 
@@ -84,7 +84,6 @@ function main() {
 	    for(let node in path){
 		if(data.points[point].name == path[node]){
 		    points.push( new THREE.Vector3(data.points[point].position[0], data.points[point].position[1], data.points[point].position[2]));
-		    console.log("point !");
 		}
 	    }
 	}
@@ -92,16 +91,39 @@ function main() {
 	const line = new THREE.Line( geometry, materialLine );
 	scene.add(line);
     }
-    function drawObject(file, name){
+    function drawObject(file, name, position){
 	const loader = new GLTFLoader();
-	let obj;
 
-	loader.load(file , function ( gltf ) {
-	    obj = gltf.scene;
-	    scene.add(obj)
+	loader.load(file , function (gltf) {
+	    // const materialGLTFObject = new THREE.MeshBasicMaterial( { color: 0xffffff, transparent: true} );
+	    // const GLTFObject = new THREE.Mesh( materialGLTFObject, materialGLTFObject);
+	    // scene.add(GLTFObject);
+
+	    const model = gltf.scene
+
+	    model.traverse(function(object){
+		if(object.isMesh){
+		    console.log(object);
+		    object.material.color.set(0xffffff);
+		    object.material.emissive.set(0xffffff);
+		    object.material.transparent = true;
+		    object.material.opacity = 0.5;
+		}
+
+	    })
+
+	    model.position.set(position[0], position[1]+2, position[2])
+	    // gltf.scene.rotation.set(Math.random()*45, Math.random()*45, Math.random()*45)
+	    // gltf.scene.children[0].material.transparent = true;
+	    // gltf.scene.children[0].material.opacity = 0.5;
+	    // gltf.scene.children[0].material.color.setRGB(1,1,1);
+	    scene.add(model);
+	    // console.log(gltf.scene.children[0].material);
+	
 	}, undefined, function ( error ) {
 	    console.error( error );
 	});
+
 
 
 	for(const point in data.points){
@@ -117,7 +139,7 @@ function main() {
     renderer.render( scene, camera );   
 
     drawPoints("object", data.points, 0xffffff, 1, false);
-    drawObject('_assets/cocotte.glb', "cocotte");
+    // drawObject('_assets/cube.glb', "cocotte");
     // drawPoints("nebula", data.nebula, 0xffffff, 0.35, true, 0.25);
     drawPath(path1);
     createLabels();
@@ -128,8 +150,8 @@ function main() {
 
 
     function createLabels(){
-	console.log('create labels');
-	console.log(document.body);
+	// console.log('create labels');
+	// console.log(document.body);
 	const wrapper = document.createElement('div');
 	wrapper.setAttribute('id', 'wrapper')
 	document.body.append(wrapper);
@@ -173,30 +195,13 @@ function main() {
 	    const y = (tempV.y * -.5 + .5) * canvas.clientHeight;
 	    const z = tempV.z
 
-	    if(data.points[point].name == "cocotte"){
-		console.log(z*100);
-		console.log(scale(z*100, 97.8,98.7,0,1));
-		// console.console.log(z.map(0,0,0,0));
-	    }
+
 	    
 	    // console.log(x);
 
 	    // console.log("cocooooootte");
 	    elem.setAttribute('style', 'transform: translate(-50%, 0%) translate('+x+'px,'+y+'px);opacity:'+scale(z*100, 97.8,98.7,1, 0)+';');
-	    // elem.style.transform = 'translate(-50%, -50%) translate(${x}px,${y}px)';
-	    // console.log(document.getElementById(data.points[point].name))
-	    // elem.setAttribute("name", "name");
-	    // console.log(elem);
-
-	    
-	    // const x = tempV.x*canvas.clientWidth;
-	    // const y = tempV.y*canvas.clientHeight;
-	    
-	    // move the elem to that position
-
-
-	    // set the zIndex for sorting
-	    // elem.style.zIndex = (-tempV.z * .5 + .5) * 100000 | 0;
+	    elem.style.zIndex = (-tempV.z * .5 + .5) * 100000 | 0;
 	}
     }
 
@@ -228,6 +233,7 @@ function main() {
     }
 
     function ClickObject(o){
+	console.log(o.parent.position.distanceTo(camera.position));
 	const speed = 175;
 	const easingType = TWEEN.Easing.Cubic.InOut;
 	
@@ -260,7 +266,8 @@ function main() {
 	console.log(raycaster);
 	// raycaster.set(null);
     }
-    
+
+
     function animate() {
 	requestAnimationFrame( animate );
 
@@ -271,8 +278,48 @@ function main() {
 	stats.update();
 	renderer.render( scene, camera );
 
+	scene.traverse(function(object){
+	    if(object.isMesh){
+		// console.log(object.parent.type == "Group");
 
+		if(object.parent.type == "Group"){
+		    object.material.opacity = scale(object.parent.position.distanceTo(camera.position), 122, 90, 0.5, 1);
+		} else {
+		    object.material.opacity = scale(object.position.distanceTo(camera.position), 122, 90, 0.5, 1);
+		}
 
+	    }
+	    // if(object.isGroup){
+	    // 	object.traverse(function(obj){
+	    // 	    if(obj.isMesh){
+	    // 		// console.log(">>>>>>>>>>>>> "+obj.material.opacity);
+	    // 		// console.log(group.position.distanceTo(camera.position));
+	    // 		obj.material.opacity = scale(obj.parent.position.distanceTo(camera.position), 122, 90, 0, 1)
+	    // 		// group.material.opacity = 0.25;
+	    // 	    }
+	    // 	})
+	    // }
+
+	})
+	// for(const object of scene.children){
+	    
+	//     if(object.type == "Mesh"){
+	// 	// if (object.name == "cocotte") {
+	// 	//     console.log(object.position.distanceTo(camera.position));
+	// 	// }
+	// 	// object.material.opacity = scale(object.position.z, -20, 20);
+	//     } else if (object.type == "Group"){
+	// 	object.traverse(function(obj){
+	// 	    // obj.material.opacity = Math.random();
+	// 	    // console.log(obj.position.distanceTo(camera.position));
+	// 	})
+	// 	// object.children[0].material.opacity = 0.5
+		
+	// 	// console.log(object.children[0].material.transparent);
+	//     }
+	//     // console.log(object);
+	//     // object.material.opacity = 0.5;
+	// }
 	// calculate objects intersecting the picking ray
 	
 	
