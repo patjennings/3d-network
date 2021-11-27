@@ -1,0 +1,20 @@
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: sans-serif;
+  background: #00155F; }
+
+#c {
+  width: 100%;
+  height: 100%;
+  display: block;
+  background-size: cover; }
+
+.label {
+  position: absolute;
+  color: #FFF;
+  left: 0;
+  /* make our position the top left of the container */
+  top: 0; }
+
+/*# sourceMappingURL=index.css.map */
