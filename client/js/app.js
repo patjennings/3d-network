@@ -9,11 +9,15 @@ import scale from './utils/scale';
 // let nebulaPoints;
 let data = {};
 
-const path1 = ["cocotte", "lettre", "cube"];
+const path1 = ['cocotte', 'lettre', 'cube'];
+const path2 = ['temp-1', 'temp-11', 'temp-4', 'temp-10'];
+const path3 = ['temp-3', 'tableau', 'temp-15', 'temp-6'];
+const path4 = ['temp-5', 'temp-14', 'temp-16', 'temp-17', 'temp-7'];
+const path5 = ['temp-2', 'temp-8', 'temp-12', 'temp-9', 'temp-0'];
 
 (async function(window){
     // console.log(data);
-    loadData("./data/object-points.json", "points").then(loadData("./data/nebula-points.json", "nebula")).then(main);
+    loadData('./data/object-points.json', 'points').then(loadData('./data/nebula-points.json', 'nebula')).then(main);
 })(window);
 
 async function loadData(file, name){
@@ -21,7 +25,7 @@ async function loadData(file, name){
     const loadedData = await response.json();
 
     Object.defineProperty(data, name, {
-	"value": loadedData
+	'value': loadedData
     });
 }
 
@@ -95,15 +99,12 @@ function main() {
 	const loader = new GLTFLoader();
 
 	loader.load(file , function (gltf) {
-	    // const materialGLTFObject = new THREE.MeshBasicMaterial( { color: 0xffffff, transparent: true} );
-	    // const GLTFObject = new THREE.Mesh( materialGLTFObject, materialGLTFObject);
-	    // scene.add(GLTFObject);
 
 	    const model = gltf.scene
+	    model.name = name;
 
 	    model.traverse(function(object){
 		if(object.isMesh){
-		    console.log(object);
 		    object.material.color.set(0xffffff);
 		    object.material.emissive.set(0xffffff);
 		    object.material.transparent = true;
@@ -113,12 +114,8 @@ function main() {
 	    })
 
 	    model.position.set(position[0], position[1]+2, position[2])
-	    // gltf.scene.rotation.set(Math.random()*45, Math.random()*45, Math.random()*45)
-	    // gltf.scene.children[0].material.transparent = true;
-	    // gltf.scene.children[0].material.opacity = 0.5;
-	    // gltf.scene.children[0].material.color.setRGB(1,1,1);
+	    model.rotation.set(Math.random()*45, Math.random()*45, Math.random()*45)
 	    scene.add(model);
-	    // console.log(gltf.scene.children[0].material);
 	
 	}, undefined, function ( error ) {
 	    console.error( error );
@@ -127,7 +124,6 @@ function main() {
 
 
 	for(const point in data.points){
-
 	    for(const point in data.points){
 		if(data.points[point] == name) {
 		    
@@ -138,10 +134,12 @@ function main() {
     
     renderer.render( scene, camera );   
 
-    drawPoints("object", data.points, 0xffffff, 1, false);
-    // drawObject('_assets/cube.glb', "cocotte");
-    // drawPoints("nebula", data.nebula, 0xffffff, 0.35, true, 0.25);
+    drawPoints('object', data.points, 0xffffff, 1, false);
     drawPath(path1);
+    drawPath(path2);
+    drawPath(path3);
+    drawPath(path4);
+    drawPath(path5);
     createLabels();
     animate();
 
@@ -150,7 +148,7 @@ function main() {
 
 
     function createLabels(){
-	// console.log('create labels');
+	console.log('create labels');
 	// console.log(document.body);
 	const wrapper = document.createElement('div');
 	wrapper.setAttribute('id', 'wrapper')
@@ -164,16 +162,15 @@ function main() {
 	    label.append(p)
 	    wrapper.append(label);
 	}
-	    // <div class="label" id="cocotte">Cocotte</div>
+	    // <div class='label' id='cocotte'>Cocotte</div>
     }
 
 
     function updateLabels() {
 	// exit if we have not yet loaded the JSON file
-	// if (!countries) {
-	//     return;
-	// }
-	// console.log(tempV);
+	if (!data.points) {
+	    return;
+	}
 	const tempV = new THREE.Vector3();
 	
 	for (const point in data.points) {
@@ -199,7 +196,7 @@ function main() {
 	    
 	    // console.log(x);
 
-	    // console.log("cocooooootte");
+	    // console.log('cocooooootte');
 	    elem.setAttribute('style', 'transform: translate(-50%, 0%) translate('+x+'px,'+y+'px);opacity:'+scale(z*100, 97.8,98.7,1, 0)+';');
 	    elem.style.zIndex = (-tempV.z * .5 + .5) * 100000 | 0;
 	}
@@ -216,15 +213,14 @@ function main() {
 	const intersects = raycaster.intersectObjects( scene.children );
 	let object;
 	for ( let i = 0; i < intersects.length; i ++ ) {
-	    if (intersects[i].object.subtype !== "nebula") {
-		console.log("ok");
+	    if (intersects[i].object.subtype !== 'nebula') {
 		object = intersects[i].object;
 	    }
 	}
 	// console.log(scene);
 	// for (let j = 0; j < scene.children.length; j++){
 	//     // console.log(scene.children[i]);
-	//     if(scene.children[j].type !== "Line"){
+	//     if(scene.children[j].type !== 'Line'){
 	// 	moveToCenter(scene.children[j])
 	//     }
 
@@ -233,34 +229,36 @@ function main() {
     }
 
     function ClickObject(o){
-	console.log(o.parent.position.distanceTo(camera.position));
-	const speed = 175;
-	const easingType = TWEEN.Easing.Cubic.InOut;
+	console.log(o.parent.name);
 	
-	new TWEEN.Tween(o.scale)
-	    .to(
-                {
-		    x: 5,
-		    y: 5,
-		    z: 5
-                },
-                speed
-	    )
-	    .easing(easingType)
-	    .start()
-	    .onComplete(function(){
-		new TWEEN.Tween(o.scale)
-		    .to(
-			{
-			    x: 1,
-			    y: 1,
-			    z: 1
-			},
-			speed/1.5
-		    )
-		    .easing(easingType)
-		    .start()
-	    })
+	// ANIMATION
+	// const speed = 175;
+	// const easingType = TWEEN.Easing.Cubic.InOut;
+	
+	// new TWEEN.Tween(o.scale)
+	//     .to(
+        //         {
+	// 	    x: 5,
+	// 	    y: 5,
+	// 	    z: 5
+        //         },
+        //         175
+	//     )
+	//     .easing(TWEEN.Easing.Cubic.In)
+	//     .start()
+	//     .onComplete(function(){
+	// 	new TWEEN.Tween(o.scale)
+	// 	    .to(
+	// 		{
+	// 		    x: 1,
+	// 		    y: 1,
+	// 		    z: 1
+	// 		},
+	// 		175/1.5
+	// 	    )
+	// 	    .easing(TWEEN.Easing.Cubic.Out)
+	// 	    .start()
+	//     })
     }
     function onRelease(e){
 	console.log(raycaster);
@@ -280,9 +278,9 @@ function main() {
 
 	scene.traverse(function(object){
 	    if(object.isMesh){
-		// console.log(object.parent.type == "Group");
+		// console.log(object.parent.type == 'Group');
 
-		if(object.parent.type == "Group"){
+		if(object.parent.type == 'Group'){
 		    object.material.opacity = scale(object.parent.position.distanceTo(camera.position), 122, 90, 0.5, 1);
 		} else {
 		    object.material.opacity = scale(object.position.distanceTo(camera.position), 122, 90, 0.5, 1);
@@ -292,7 +290,7 @@ function main() {
 	    // if(object.isGroup){
 	    // 	object.traverse(function(obj){
 	    // 	    if(obj.isMesh){
-	    // 		// console.log(">>>>>>>>>>>>> "+obj.material.opacity);
+	    // 		// console.log('>>>>>>>>>>>>> '+obj.material.opacity);
 	    // 		// console.log(group.position.distanceTo(camera.position));
 	    // 		obj.material.opacity = scale(obj.parent.position.distanceTo(camera.position), 122, 90, 0, 1)
 	    // 		// group.material.opacity = 0.25;
@@ -303,12 +301,12 @@ function main() {
 	})
 	// for(const object of scene.children){
 	    
-	//     if(object.type == "Mesh"){
-	// 	// if (object.name == "cocotte") {
+	//     if(object.type == 'Mesh'){
+	// 	// if (object.name == 'cocotte') {
 	// 	//     console.log(object.position.distanceTo(camera.position));
 	// 	// }
 	// 	// object.material.opacity = scale(object.position.z, -20, 20);
-	//     } else if (object.type == "Group"){
+	//     } else if (object.type == 'Group'){
 	// 	object.traverse(function(obj){
 	// 	    // obj.material.opacity = Math.random();
 	// 	    // console.log(obj.position.distanceTo(camera.position));
@@ -328,7 +326,7 @@ function main() {
 	
 	
 	//     if(object.position.distanceTo(camera.position) < 80){
-	// 	if(!isFirst && object.type !== "Line"){
+	// 	if(!isFirst && object.type !== 'Line'){
 	// 	    object.material.opacity = 1;
 	// 	    isFirst = true;
 	// 	}
