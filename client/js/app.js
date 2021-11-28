@@ -9,15 +9,22 @@ import scale from './utils/scale';
 // let nebulaPoints;
 let data = {};
 
-const path1 = ['cocotte', 'lettre', 'cube'];
+const path1 = ['temp-20', 'temp-18', 'temp-19'];
 const path2 = ['temp-1', 'temp-11', 'temp-4', 'temp-10'];
-const path3 = ['temp-3', 'tableau', 'temp-15', 'temp-6'];
+const path3 = ['temp-3', 'temp-13', 'temp-15', 'temp-6'];
 const path4 = ['temp-5', 'temp-14', 'temp-16', 'temp-17', 'temp-7'];
 const path5 = ['temp-2', 'temp-8', 'temp-12', 'temp-9', 'temp-0'];
+const path6 = ['temp-21', 'temp-22', 'temp-23'];
 
 (async function(window){
     // console.log(data);
-    loadData('./data/object-points.json', 'points').then(loadData('./data/nebula-points.json', 'nebula')).then(main);
+    loadData('./data/object-points-2.json', 'points')
+	.then(loadData('./data/nebula-points-2.json', 'nebula'))
+	.then(main)
+	// .catch(function (err) {
+	//     // This will fix your error since you are now handling the error thrown by your first catch block
+	//     console.log(err.message)
+	// });
 })(window);
 
 async function loadData(file, name){
@@ -27,14 +34,16 @@ async function loadData(file, name){
     Object.defineProperty(data, name, {
 	'value': loadedData
     });
+    console.log(loadedData);
 }
 
 function main() {
     const canvas = document.querySelector('#c');
+    console.log(data);
 
     const renderer = new THREE.WebGLRenderer({
 	canvas,
-	alpha: true,
+	alpha: true
     });
     
     const scene = new THREE.Scene();
@@ -74,7 +83,7 @@ function main() {
 	    point.name = element.name
     	    scene.add(point);
 
-	    drawObject('_assets/cube.glb', element.name, element.position);
+	    type == "object" ? drawObject('_assets/cube.glb', element.name, element.position) : null;
 	}
     }
 
@@ -120,9 +129,6 @@ function main() {
 	}, undefined, function ( error ) {
 	    console.error( error );
 	});
-
-
-
 	for(const point in data.points){
 	    for(const point in data.points){
 		if(data.points[point] == name) {
@@ -135,12 +141,18 @@ function main() {
     renderer.render( scene, camera );   
 
     drawPoints('object', data.points, 0xffffff, 1, false);
+    drawPoints('nebula', data.nebula, 0xffffff, 0.5, true, 0.15);
+    console.log(data.nebula.length);
+    for(const element of data.nebula){
+	console.log(element);
+    }
     drawPath(path1);
     drawPath(path2);
     drawPath(path3);
     drawPath(path4);
     drawPath(path5);
-    createLabels();
+    drawPath(path6);
+    // createLabels();
     animate();
 
     console.log(scene);
@@ -148,7 +160,7 @@ function main() {
 
 
     function createLabels(){
-	console.log('create labels');
+	// console.log('create labels');
 	// console.log(document.body);
 	const wrapper = document.createElement('div');
 	wrapper.setAttribute('id', 'wrapper')
@@ -271,7 +283,7 @@ function main() {
 
 	const delta = clock.getDelta();
 	controls.update();
-	updateLabels();
+	// updateLabels();
 	TWEEN.update();
 	stats.update();
 	renderer.render( scene, camera );
