@@ -16,30 +16,30 @@ const path4 = ['temp-5', 'temp-14', 'temp-16', 'temp-17', 'temp-7'];
 const path5 = ['temp-2', 'temp-8', 'temp-12', 'temp-9', 'temp-0'];
 const path6 = ['temp-21', 'temp-22', 'temp-23'];
 
-(async function(window){
-    // console.log(data);
-    loadData('./data/object-points-2.json', 'points')
-	.then(loadData('./data/nebula-points-2.json', 'nebula'))
-	.then(main)
-	// .catch(function (err) {
-	//     // This will fix your error since you are now handling the error thrown by your first catch block
-	//     console.log(err.message)
-	// });
+(function(window){
+    initialize();
 })(window);
 
-async function loadData(file, name){
-    const response = await fetch(file);
-    const loadedData = await response.json();
+async function initialize(){
+    let objectPoints = await fetch('./data/object-points-2.json');
+    let pointsLoaded = await objectPoints.json();
+    let nebulaPoints = await fetch('./data/nebula-points-2.json');
+    let nebulaLoaded = await nebulaPoints.json();
 
-    Object.defineProperty(data, name, {
-	'value': loadedData
+    Object.defineProperty(data, 'objects', {
+	'value': pointsLoaded
     });
-    console.log(loadedData);
+    Object.defineProperty(data, 'nebula', {
+	'value': nebulaLoaded
+    });
+
+    main();
 }
+
+
 
 function main() {
     const canvas = document.querySelector('#c');
-    console.log(data);
 
     const renderer = new THREE.WebGLRenderer({
 	canvas,
@@ -73,6 +73,7 @@ function main() {
     const mouse = new THREE.Vector2();
 
     function drawPoints(type, data, color, opacity, isRandom, randomRatio=1){
+	console.log(data);
 	for(const element of data){
 	    const pointGeometry = new THREE.SphereGeometry( isRandom ? Math.random()*randomRatio : 0.25, 32, 16 );
 	    const materialPoints = new THREE.MeshBasicMaterial( { color: color, transparent: true} );
@@ -93,10 +94,10 @@ function main() {
 	const materialLine = new THREE.LineBasicMaterial( { color: 0xffffff, transparent: true} );
 	materialLine.opacity = 0.25;
 	
-	for(let point in data.points){
+	for(let point in data.objects){
 	    for(let node in path){
-		if(data.points[point].name == path[node]){
-		    points.push( new THREE.Vector3(data.points[point].position[0], data.points[point].position[1], data.points[point].position[2]));
+		if(data.objects[point].name == path[node]){
+		    points.push( new THREE.Vector3(data.objects[point].position[0], data.objects[point].position[1], data.objects[point].position[2]));
 		}
 	    }
 	}
@@ -129,9 +130,9 @@ function main() {
 	}, undefined, function ( error ) {
 	    console.error( error );
 	});
-	for(const point in data.points){
-	    for(const point in data.points){
-		if(data.points[point] == name) {
+	for(const point in data.objects){
+	    for(const point in data.objects){
+		if(data.objects[point] == name) {
 		    
 		}
 	    }
@@ -140,19 +141,19 @@ function main() {
     
     renderer.render( scene, camera );   
 
-    drawPoints('object', data.points, 0xffffff, 1, false);
+    drawPoints('object', data.objects, 0xffffff, 1, false);
     drawPoints('nebula', data.nebula, 0xffffff, 0.5, true, 0.15);
-    console.log(data.nebula.length);
-    for(const element of data.nebula){
-	console.log(element);
-    }
+    // console.log(data.nebula.length);
+    // for(const element of data.nebula){
+	// console.log(element);
+    // }
     drawPath(path1);
     drawPath(path2);
     drawPath(path3);
     drawPath(path4);
     drawPath(path5);
     drawPath(path6);
-    // createLabels();
+    createLabels();
     animate();
 
     console.log(scene);
@@ -160,17 +161,17 @@ function main() {
 
 
     function createLabels(){
-	// console.log('create labels');
+	console.log('create labels');
 	// console.log(document.body);
 	const wrapper = document.createElement('div');
 	wrapper.setAttribute('id', 'wrapper')
 	document.body.append(wrapper);
-	for(const point in data.points){
+	for(const point in data.objects){
 	    const label = document.createElement('div')
 	    const p = document.createElement('p')
-	    label.setAttribute('id', data.points[point].name)
+	    label.setAttribute('id', data.objects[point].name)
 	    label.setAttribute('class', 'label')
-	    p.append(data.points[point].name)
+	    p.append(data.objects[point].name)
 	    label.append(p)
 	    wrapper.append(label);
 	}
@@ -180,18 +181,18 @@ function main() {
 
     function updateLabels() {
 	// exit if we have not yet loaded the JSON file
-	if (!data.points) {
+	if (!data.objects) {
 	    return;
 	}
 	const tempV = new THREE.Vector3();
 	
-	for (const point in data.points) {
-	    const elem = document.getElementById(data.points[point].name);
+	for (const point in data.objects) {
+	    const elem = document.getElementById(data.objects[point].name);
 	    // console.log(typeof(elem));
 	    const position = {
-		x: data.points[point].position[0],
-		y: data.points[point].position[1],
-		z: data.points[point].position[2]
+		x: data.objects[point].position[0],
+		y: data.objects[point].position[1],
+		z: data.objects[point].position[2]
 	    };
 
 	    tempV.copy(position);

@@ -17,9 +17,13 @@
 						"css-loader": "^2.1.0",
 						"file-loader": "^3.0.1",
 						"node-sass": "^4.11.0",
+						"optimize-css-assets-webpack-plugin": "^6.0.1",
+						"postcss": "^8.2.2",
 						"sass-loader": "^7.1.0",
 						"style-loader": "^0.23.1",
-						"webpack": "^4.29.3",
+						"terser-webpack-plugin": "^5.2.5",
+						"uglify-js": "^3.14.3",
+						"webpack": "^5.1.0",
 						"webpack-cli": "^3.2.3"
 			},
 			"scripts": {
