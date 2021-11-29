@@ -9,6 +9,8 @@ import scale from './utils/scale';
 // let nebulaPoints;
 let data = {};
 
+const assetsFolder = "_assets/";
+
 const path1 = ['temp-20', 'temp-18', 'temp-19'];
 const path2 = ['temp-1', 'temp-11', 'temp-4', 'temp-10'];
 const path3 = ['temp-3', 'temp-13', 'temp-15', 'temp-6'];
@@ -73,7 +75,6 @@ function main() {
     const mouse = new THREE.Vector2();
 
     function drawPoints(type, data, color, opacity, isRandom, randomRatio=1){
-	console.log(data);
 	for(const element of data){
 	    const pointGeometry = new THREE.SphereGeometry( isRandom ? Math.random()*randomRatio : 0.25, 32, 16 );
 	    const materialPoints = new THREE.MeshBasicMaterial( { color: color, transparent: true} );
@@ -84,7 +85,8 @@ function main() {
 	    point.name = element.name
     	    scene.add(point);
 
-	    type == "object" ? drawObject('_assets/cube.glb', element.name, element.position) : null;
+
+	    type == "object" ? drawObject(assetsFolder+element.mesh, element.name, element.position) : null;
 	}
     }
 
@@ -124,7 +126,8 @@ function main() {
 	    })
 
 	    model.position.set(position[0], position[1]+2, position[2])
-	    model.rotation.set(Math.random()*45, Math.random()*45, Math.random()*45)
+	    model.rotation.set(0, Math.random()*45, 0);
+	    // model.scale.set(0.5,0.5,0.5);
 	    scene.add(model);
 	
 	}, undefined, function ( error ) {
